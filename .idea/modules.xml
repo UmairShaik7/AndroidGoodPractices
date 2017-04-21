@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndroidGoodPractices.iml" filepath="$PROJECT_DIR$/AndroidGoodPractices.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/googleclientvslocationlistner/googleclientvslocationlistner.iml" filepath="$PROJECT_DIR$/googleclientvslocationlistner/googleclientvslocationlistner.iml" />
     </modules>
   </component>
 </project>
