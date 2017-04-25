@@ -48,11 +48,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
-                bundle.putString(String.valueOf(button.getId()), "CLicked");
-                mFirebaseAnalytics.logEvent("navigate_to_second_screen", bundle);
-
+                bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "1");
+                bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "Umair");
+                bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image");
+                mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
                 mGoogleApiClient.disconnect();
-                startActivity(new Intent(MainActivity.this, SecondActivity.class));
+                startActivity(new Intent(MainActivity.this, GPSAndroidProvider.class));
             }
         });
 
@@ -94,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         mLastLocation = location;
         Log.d(TAG, "" + mLastLocation.getLatitude() + "  " + mLastLocation.getLongitude());
+        Bundle bundle = new Bundle();
+        bundle.putString("Location", "In onLocationChange");
+        mFirebaseAnalytics.logEvent("Location", bundle);
     }
 
     @Override

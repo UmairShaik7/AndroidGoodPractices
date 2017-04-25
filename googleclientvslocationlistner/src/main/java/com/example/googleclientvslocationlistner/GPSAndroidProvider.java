@@ -1,6 +1,7 @@
 package com.example.googleclientvslocationlistner;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -8,17 +9,34 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
-public class SecondActivity extends AppCompatActivity implements android.location.LocationListener {
+public class GPSAndroidProvider extends AppCompatActivity implements android.location.LocationListener {
 
-    private static final String TAG = SecondActivity.class.getName();
+    private static final String TAG = GPSAndroidProvider.class.getName();
     private LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
+        initLocation();
+        init();
+    }
+
+    private void init() {
+        Button nextButton = (Button) findViewById(R.id.bt_next);
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(GPSAndroidProvider.this, RemoteConfigFirebaseDemo.class));
+            }
+        });
+    }
+
+    private boolean initLocation() {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -29,12 +47,12 @@ public class SecondActivity extends AppCompatActivity implements android.locatio
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            return;
+            return true;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                 2000,
                 1, this);
-
+        return false;
     }
 
     @Override
