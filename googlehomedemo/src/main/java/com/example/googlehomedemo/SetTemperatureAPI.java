@@ -9,7 +9,7 @@ import retrofit2.http.PUT;
  * Created by ABC on 02/11/2016.
  */
 
-public interface RestaurantAPI {
+public interface SetTemperatureAPI {
     /*static final Map<String, String> header;
 
     static {
@@ -20,5 +20,5 @@ public interface RestaurantAPI {
     @Headers({"appKey: bae175f3-4ef1-47d3-bc87-feb4c33fa061",
             "Content-Type: application/json"})
     @PUT("Properties/Temperature")
-    Call<String> getTask(@Body Payload payload);
+    Call<String> getTask(@Body TemperaturePayload temperaturePayload);
 }

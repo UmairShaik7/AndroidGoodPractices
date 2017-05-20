@@ -205,12 +205,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (integer > 50) {
             return;
         }
-        RestaurantAPI client = ServiceGenerator
+        SetTemperatureAPI client = ServiceGenerator
                 .getClient()
-                .create(RestaurantAPI.class);
-        Payload payload = new Payload();
-        payload.setTemperature(integer + "");
-        Call<String> call = client.getTask(payload);
+                .create(SetTemperatureAPI.class);
+        TemperaturePayload temperaturePayload = new TemperaturePayload();
+        temperaturePayload.setTemperature(integer + "");
+        Call<String> call = client.getTask(temperaturePayload);
         call.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
