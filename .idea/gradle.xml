@@ -10,6 +10,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/googleclientvslocationlistner" />
+            <option value="$PROJECT_DIR$/googlehomedemo" />
+            <option value="$PROJECT_DIR$/googlereportapis" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
