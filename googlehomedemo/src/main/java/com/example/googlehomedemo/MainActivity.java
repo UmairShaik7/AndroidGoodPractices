@@ -3,8 +3,10 @@ package com.example.googlehomedemo;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -32,12 +34,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextToSpeech.OnInitListener {
     //Need to build this url but for this demo its ok
     private static final String URLConstant = "https://academic.cloud.thingworx.com/Thingworx/Things/SmartHomeThermostat_umair_shaik/Properties/Temperature";
     private static final String TAG = "TAG";
     private static final int REQ_CODE_SPEECH_INPUT = 1001;
     private static final Map<String, String> header;
+    private static final int MY_DATA_CHECK_CODE = 1002;
 
     static {
         header = new HashMap<>();
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         header.put("Content-Type", "application/json");
     }
 
+    private TextToSpeech myTTS;
     private TextView tempLabel;
     private TextView tempValue;
     private Button setTemp;
@@ -60,6 +64,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txtSpeechInput = (TextView) findViewById(R.id.tv_speech_value);
         setTemp.setOnClickListener(this);
         getThermostatData();
+        checkTextToSpeech();
+    }
+
+    private void checkTextToSpeech() {
+        Intent checkTTSIntent = new Intent();
+        checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
     }
 
 
@@ -195,6 +206,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             }
+            case MY_DATA_CHECK_CODE:
+
+                if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                    //the user has the necessary data - create the TTS
+                    myTTS = new TextToSpeech(this, this);
+                } else {
+                    //no data - install it now
+                    Intent installTTSIntent = new Intent();
+                    installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                    startActivity(installTTSIntent);
+                }
+
+                break;
+            default:
+                break;
 
         }
     }
@@ -205,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (integer > 50) {
             return;
         }
+        speakWords("setting temperature to" + integer);
         SetTemperatureAPI client = ServiceGenerator
                 .getClient()
                 .create(SetTemperatureAPI.class);
@@ -226,6 +253,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
+    }
+
+    private void speakWords(String s) {
+        String utteranceId = this.hashCode() + "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            myTTS.speak(s, TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+        }
     }
 
     private String getJsonData(Integer integer) {
@@ -259,6 +293,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public void onInit(int initStatus) {
+        if (initStatus == TextToSpeech.SUCCESS) {
+            if (myTTS.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE)
+                myTTS.setLanguage(Locale.US);
+        } else if (initStatus == TextToSpeech.ERROR) {
+            Toast.makeText(this, "Sorry! Text To Speech failed...", Toast.LENGTH_LONG).show();
+        }
     }
 
 
