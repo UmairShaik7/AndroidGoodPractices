@@ -290,10 +290,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean extractNumberONorOFFStatus(String a) {
         String[] statusQuote = {"on", "off", "play"};
         if (a.toLowerCase().contains(statusQuote[0]) || a.toLowerCase().contains(statusQuote[2].toLowerCase())) {
+            speakWords("Turing the tv on");
             return true;
         } else if (a.toLowerCase().contains(statusQuote[1].toLowerCase())) {
+            speakWords("Turing off the tv");
             return false;
         } else {
+            speakWords("I didn't quite get that");
             return Boolean.parseBoolean(tvStatus.getText().toString());
         }
 
