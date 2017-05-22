@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ServiceGenerator {
 
-    public static final String API_BASE_URL = "https://academic.cloud.thingworx.com/Thingworx/Things/SmartHomeThermostat_umair_shaik/";
+    public static final String API_BASE_URL = "https://academic.cloud.thingworx.com/Thingworx/Things/";
 
     static HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
     // set your desired log level

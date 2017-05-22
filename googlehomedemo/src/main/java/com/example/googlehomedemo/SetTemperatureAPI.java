@@ -19,6 +19,6 @@ public interface SetTemperatureAPI {
     }*/
     @Headers({"appKey: bae175f3-4ef1-47d3-bc87-feb4c33fa061",
             "Content-Type: application/json"})
-    @PUT("Properties/Temperature")
-    Call<String> getTask(@Body TemperaturePayload temperaturePayload);
+    @PUT("SmartHomeThermostat_umair_shaik/Properties/Temperature")
+    Call<Void> getTask(@Body TemperaturePayload temperaturePayload);
 }

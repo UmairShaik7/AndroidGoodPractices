@@ -36,7 +36,8 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextToSpeech.OnInitListener {
     //Need to build this url but for this demo its ok
-    private static final String URLConstant = "https://academic.cloud.thingworx.com/Thingworx/Things/SmartHomeThermostat_umair_shaik/Properties/Temperature";
+    private static final String URL_THERMOSTAT = "https://academic.cloud.thingworx.com/Thingworx/Things/SmartHomeThermostat_umair_shaik/Properties/Temperature";
+    private static final String URL_TV_STATUS = "https://academic.cloud.thingworx.com/Thingworx/Things/SmartTV_umair_shaik/Properties/status";
     private static final String TAG = "TAG";
     private static final int REQ_CODE_SPEECH_INPUT = 1001;
     private static final Map<String, String> header;
@@ -53,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tempValue;
     private Button setTemp;
     private TextView txtSpeechInput;
+    private TextView tvStatus;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +65,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tempValue = (TextView) findViewById(R.id.tv_temp_value);
         setTemp = (Button) findViewById(R.id.bt_settemp);
         txtSpeechInput = (TextView) findViewById(R.id.tv_speech_value);
+        tvStatus = (TextView) findViewById(R.id.tv_tv_status);
         setTemp.setOnClickListener(this);
-        getThermostatData();
+        getWidgetsData();
         checkTextToSpeech();
     }
 
@@ -74,34 +78,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void getThermostatData() {
-        /*Map<String, String> extraHeaders = new HashMap<String, String>();
-        extraHeaders.put("appKey", "bae175f3-4ef1-47d3-bc87-feb4c33fa061");
-        extraHeaders.put("Content-Type", "application/json");
-        loginWebView.setVisibility(View.VISIBLE);
-        loginWebView.loadUrl(URLConstant, extraHeaders);
-        final WebSettings webSettings = loginWebView.getSettings();
+    private void getWidgetsData() {
+        getThermostatData();
+        getTVStatus();
+    }
 
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setSupportZoom(false);
-        webSettings.setAppCacheEnabled(false);
-        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        webSettings.setSaveFormData(false);
-        webSettings.setAppCacheEnabled(false);
-        loginWebView.setWebViewClient(new LoginWebViewClient());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
-        loginWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");*/
-
-
+    private void getTVStatus() {
         new AsyncTask<Object, Object, Document>() {
             @Override
             protected Document doInBackground(Object... params) {
                 Document document = null;//can add as many as you like
                 try {
-                    document = Jsoup.connect(URLConstant)
+                    document = Jsoup.connect(URL_TV_STATUS)
                             .headers(header).get();
                     Log.d(TAG, document.toString());
 
@@ -127,7 +115,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d("TAG, Th element", th.text());
                     Log.d("TAG, Td element", cols.text());
                     if (!th.text().equals("")) {
-                        tempLabel.setText(th.text());
+                        //tempLabel.setText(th.text());
+                    }
+                    if (!cols.text().equals("")) {
+                        tvStatus.setText(cols.text().equals("true") ? "ON" : "OFF");
+                    }
+                }
+            }
+        }.execute();
+    }
+
+    private void getThermostatData() {
+        new AsyncTask<Object, Object, Document>() {
+            @Override
+            protected Document doInBackground(Object... params) {
+                Document document = null;//can add as many as you like
+                try {
+                    document = Jsoup.connect(URL_THERMOSTAT)
+                            .headers(header).get();
+                    Log.d(TAG, document.toString());
+
+                    return document;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Document document) {
+                Element table = document.select("table").get(0);
+                Element tbody = table.select("tbody").get(0);
+                Elements rows = tbody.select("tr");
+                for (int i = 0; i < rows.size(); i++) { //first row is the col names so skip it.
+                    Element row = rows.get(i);
+                    Elements th = row.select("th");
+                    Elements cols = row.select("td");
+                    Log.d("TAG, TH", th.toString());
+                    Log.d("TAG, Td", cols.toString());
+                    Log.d("TAG, Th element", th.text());
+                    Log.d("TAG, Td element", cols.text());
+                    if (!th.text().equals("")) {
+                        //tempLabel.setText(th.text());
                     }
                     if (!cols.text().equals("")) {
                         tempValue.setText(cols.text());
@@ -135,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }.execute();
-
     }
 
     @Override
@@ -191,14 +220,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 try {
                                     setTemperatureValueTo(Integer.valueOf(temValue));
                                     txtSpeechInput.setText(temValue);
+                                    break;
                                 } catch (NumberFormatException e) {
                                     e.printStackTrace();
                                 }
                             }
                         } else {
+                            String[] sTVKeyword = {"TV", "Television"};
 
-                            Log.d(TAG, "not found");
-
+                            for (String items : sTVKeyword) {
+                                if (a.toLowerCase().contains(items.toLowerCase())) {
+                                    boolean status = extractNumberONorOFFStatus(a);
+                                    setTVto(status);
+                                    break;
+                                }
+                            }
                         }
 
                         break;
@@ -225,10 +261,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void setTVto(final boolean status) {
+        SetTVStatusAPI client = ServiceGenerator
+                .getClient()
+                .create(SetTVStatusAPI.class);
+        TVStatusPayload payload = new TVStatusPayload();
+        payload.setStatus(status);
+        Call<Void> call = client.setTVStatus(payload);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                okhttp3.Response raw = response.raw();
+                if (response.isSuccessful()) {
+                    Log.d("on Response", response.toString() + "\n" + raw.toString());
+                    tvStatus.setText(status ? "ON" : "OFF");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.d("OnError called", "Error : " + t.toString());
+            }
+        });
+
+
+    }
+
+    private boolean extractNumberONorOFFStatus(String a) {
+        String[] statusQuote = {"on", "off", "play"};
+        if (a.toLowerCase().contains(statusQuote[0]) || a.toLowerCase().contains(statusQuote[2].toLowerCase())) {
+            return true;
+        } else if (a.toLowerCase().contains(statusQuote[1].toLowerCase())) {
+            return false;
+        } else {
+            return Boolean.parseBoolean(tvStatus.getText().toString());
+        }
+
+    }
+
     private void setTemperatureValueTo(final Integer integer) {
-        if (integer < 10) {
-            return;
-        } else if (integer > 50) {
+        if (integer < 10 || integer > 50) {
+            speakWords("Select a temperature between 10 to 50");
             return;
         }
         speakWords("setting temperature to" + integer);
@@ -237,10 +310,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .create(SetTemperatureAPI.class);
         TemperaturePayload temperaturePayload = new TemperaturePayload();
         temperaturePayload.setTemperature(integer + "");
-        Call<String> call = client.getTask(temperaturePayload);
-        call.enqueue(new Callback<String>() {
+        Call<Void> call = client.getTask(temperaturePayload);
+        call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 okhttp3.Response raw = response.raw();
                 if (response.isSuccessful()) {
                     Log.d("on Response", response.toString() + "\n" + raw.toString());
@@ -249,10 +322,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
-
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.d("OnError called", "Error : " + t.toString());
             }
         });
+
     }
 
     private void speakWords(String s) {
@@ -330,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 presenter.storeAccessToken(model);
                 finish();
             } else {
-                loginWebView.loadUrl(URLConstant.BASE_URL);
+                loginWebView.loadUrl(URL_THERMOSTAT.BASE_URL);
             }*/
         }
     }

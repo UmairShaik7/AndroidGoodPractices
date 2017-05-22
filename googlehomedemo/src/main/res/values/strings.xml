@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">GoogleHomeDemo</string>
-    <string name="set_temperature">set Temperature</string>
+    <string name="set_temperature">set Temperature/switch on tv</string>
     <string name="speech_prompt">Say something&#8230;</string>
     <string name="speech_not_supported">Sorry! Your device doesn\'t support speech input</string>
+    <string name="tv_status">TV Status</string>
 </resources>
