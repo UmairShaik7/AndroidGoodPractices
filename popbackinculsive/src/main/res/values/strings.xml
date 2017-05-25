@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">PopBackInculsive</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="a_fragment">A fragment</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="b_fragment">B fragment</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="c_fragment">C fragment</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="D_fragment">D fragment</string>
+</resources>
