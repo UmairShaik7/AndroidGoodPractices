@@ -35,8 +35,10 @@ public class BFragment extends Fragment {
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.myframe, new CFragment()).
-                        addToBackStack("third").commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.myframe, new CFragment()).
+                        addToBackStack("third")
+                        .setAllowOptimization(true)
+                        .commit();
             }
         });
     }

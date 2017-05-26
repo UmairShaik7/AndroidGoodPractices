@@ -37,7 +37,8 @@ public class CFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 getActivity().getSupportFragmentManager().popBackStack("second", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.myframe, new DFragment()).addToBackStack("second").commit();
+                getActivity().getSupportFragmentManager().beginTransaction().
+                        setAllowOptimization(true).replace(R.id.myframe, new DFragment()).addToBackStack("second").commit();
             }
         });
     }
